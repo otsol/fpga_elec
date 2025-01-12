@@ -1,0 +1,76 @@
+# This file describes how the HDL ports
+# map to physical pins on the FPGA IC.
+# each non-commented line (i.e. `set_...`)
+# describes one pin. 
+
+# Push buttons
+set_io -nowarn -pullup yes      i_sw1        28
+set_io -nowarn -pullup yes      i_sw3        2
+set_io -nowarn -pullup yes      i_sw4        36
+set_io -nowarn -pullup yes      i_sw2        35
+
+# Buzzer
+set_io -nowarn      o_buzzer            37
+
+# RP2040 connections
+set_io -nowarn      io_mcu_txd        38
+set_io -nowarn      io_mcu_rxd        42
+set_io -nowarn      io_mcu_cts        43
+set_io -nowarn      io_mcu_rts        44
+
+# Unused pin
+set_io -nowarn      io_pin_10         45
+
+# Analog section
+set_io -nowarn      i_cmp_out         46
+set_io -nowarn      o_dac_pwm         47
+
+# PMOD2/WiFi Module
+set_io -nowarn      io_pmod2_p4       48
+set_io -nowarn      io_pmod2_p3       3
+set_io -nowarn      io_pmod2_p2       4
+set_io -nowarn      io_pmod2_p1       11
+
+# PMOD1
+set_io -nowarn      io_pmod1_p4       9
+set_io -nowarn      io_pmod1_p3       10
+set_io -nowarn      io_pmod1_p2       18
+set_io -nowarn      io_pmod1_p1       6
+
+# LEDs
+# N.b. LED1 is an infrared LED, i.e. produces invisible light
+set_io -nowarn -pullup yes      o_led4       23
+set_io -nowarn -pullup yes      o_led3       25
+set_io -nowarn -pullup yes      o_led2       26
+set_io -nowarn -pullup yes      o_led1_ir       27
+
+# 48 MHz clock input. DO NOT DRIVE.
+set_io              i_clk_48mhz     20
+set_frequency       i_clk_48mhz     48
+
+# 48 MHz clock shutdown output. Drive low to disable the clock.
+set_io -pullup yes -pullup_resistor 100K -nowarn    o_clk_st_n    21
+
+# RGB LED pins. These are open drain outputs
+# that must be driven by the `SB_RGB_DRV` 
+set_io -nowarn      led_blue        39
+set_io -nowarn      led_green       40
+set_io -nowarn      led_red         41
+
+# USB port
+# `o_usb_pu` _must_ be driven _low_ if
+# USB is only used for power.
+set_io              o_usb_pu    34
+# This is used to determine whether the
+# device is powered through VBUS or not.
+set_io -nowarn      i_vbus_det      19
+set_io -nowarn      io_usb_dm       32
+set_io -nowarn      io_usb_dp       31
+
+# Configuration flash (quad-)SPI port
+set_io -nowarn      o_conf_clk       15
+set_io -nowarn      o_conf_cs_n      16
+set_io -nowarn      i_conf_dat       17
+set_io -nowarn      o_conf_dat       14
+set_io -nowarn      io_conf_sd2      13
+set_io -nowarn      io_conf_sd3      12

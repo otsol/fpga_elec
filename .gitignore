@@ -2,3 +2,4 @@
 *.vcd
 *
 !*.*
+.DS_Store
