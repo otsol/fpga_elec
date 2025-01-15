@@ -1,51 +1,49 @@
-//
-// Assuming that this file is saved as "tb_edge_detector.v" and edge_detector is saved in "edge_detector.v".
-//
 // iverilog -o edge_detector -s tb_edge_detector -Wall -g2005 tb_edge_detector.v edge_detector.v
-//
-// vvp edge_detector
-//
-// gtkwave tb_edge_detector.vcd
-//
 
-//`timescale 1ns / 1ps // If "edge_detector.v" has timescale, uncomment this line
+module tb_edge_detector;
 
-module tb_edge_detector();
-    reg clock = 1;
-    reg tb_in_signal;
-    wire tb_out_strobe;
+    // Testbench signals
+    reg in_clock;
+    reg in_signal;
+    wire out_strobe;
 
-    // clock 'loop', T=4
-    always #1 clock <= !clock;
+    // Instantiate the edge_detector module
+    edge_detector uut (
+        .in_clock(in_clock),
+        .in_signal(in_signal),
+        .out_strobe(out_strobe)
+    );
 
+    // Clock generation: toggles every 5 time units (period = 10)
+    always begin
+        #5 in_clock = ~in_clock;
+    end
+
+    // Testbench stimulus
     initial begin
-        tb_in_signal = 0;
+        // Initialize signals
+        in_clock = 0;    // Start with clock low
+        in_signal = 0;   // Start with signal low
 
-        $monitor("%g\t %b   %b %b", $time, clock,
-            tb_in_signal, tb_out_strobe);
-        $dumpfile("tb_edge_detector.vcd");
-        $dumpvars(0,tb_edge_detector);
-        $display("time\t in_clk in_sig out_strobe");
+        // Wait for a few clock cycles and apply stimulus
+        #10;             // Wait for 10 time units
+        in_signal = 1;   // Trigger a rising edge on in_signal
+        #10;             // Wait for another clock cycle
+        in_signal = 0;   // Trigger a falling edge on in_signal
+        #10;             // Wait for another clock cycle
+        in_signal = 1;   // Trigger another rising edge on in_signal
+        #10;             // Wait for another clock cycle
 
-        #2
-        tb_in_signal = 1;
-
-        #2
-        tb_in_signal = 0;
-        #8
-        tb_in_signal = 1;
-        #4
-        tb_in_signal = 0;
-        #8
-        
-        #10
+        // End simulation
+        #20;
         $finish;
     end
 
-    edge_detector DUT(
-    .in_clock(clock),
-    .in_signal(tb_in_signal),
-    .out_strobe(tb_out_strobe)
-        );
+    // Monitor the signals for debugging
+    initial begin
+        $monitor("Time: %0t | Clock: %b | Signal: %b | Out Strobe: %b", 
+                 $time, in_clock, in_signal, out_strobe);
+        $dumpfile("tb_edge_detector.vcd");
+        $dumpvars(0,tb_edge_detector);
+    end
 endmodule
-
