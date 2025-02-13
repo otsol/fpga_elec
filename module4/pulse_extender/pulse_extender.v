@@ -10,11 +10,13 @@ module pulse_extender (
   reg [7:0] repetition_memory;
   reg flag;
   reg [7:0] pulse_width;
+  reg [7:0] pulse_width_mem;
 
   always @(posedge in_clock) begin
     // handle the reset
     if (in_reset) begin
       pulse_width <= 1;
+      pulse_width_mem <= 1;
       out_ack <= 0;
       flag <=0;
       repetition_memory <= 0;
@@ -23,7 +25,7 @@ module pulse_extender (
     end else begin
       // setting the pulse width in this else block
       if (in_set) begin
-        pulse_width <= in_value;
+        pulse_width_mem <= in_value;
         out_ack <= 1;
       end else begin
         out_ack <= 0;
@@ -36,22 +38,32 @@ module pulse_extender (
         // case 1: 
         // start the counter if it is NOT running already
         // also set out_signal to 1
-        if (repetition_memory == 0) begin 
+        if (repetition_memory == 0) begin
+          pulse_width <= pulse_width_mem;
           repetition_memory <= 1;
           out_signal <= 1;
+        end else begin
+          repetition_memory <= repetition_memory + 1;
+        end
           // flag <=1;
         // case 2: the counter is running but has not reached the target width
-        end else if (repetition_memory < pulse_width) begin
-          repetition_memory = repetition_memory + 1;
-        // case 3: the pulse width has been reached
-        end else begin
-          if (!in_signal) begin
-            out_signal <= 0;
-            repetition_memory <= 0;
-          end
-        end
+        // end else if (repetition_memory < pulse_width) begin
+        //   repetition_memory = repetition_memory + 1;
+        // // case 3: the pulse width has been reached
+        // end else begin
+        //   if (!in_signal) begin
+        //     out_signal <= 0;
+        //     repetition_memory <= 0;
+        //   end
+        // end
+      // case 2: the counter is running but has not reached the target width
+      end else if (repetition_memory > 0 && repetition_memory < pulse_width) begin
+        repetition_memory = repetition_memory + 1;
+      // case 3: the counter has reached the target or is over it
+      end else if (repetition_memory > pulse_width -1 ) begin
+        out_signal <= 0;
+        repetition_memory <= 0;
       end
-      
       // if (flag) begin
       //   // increment the counter until N width has been achieved
         
