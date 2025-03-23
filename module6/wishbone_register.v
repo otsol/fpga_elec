@@ -35,20 +35,18 @@ module wishbone_register #(
     begin
       if (in_wb_sel[i])
       begin
-        in_data_selected[i*8 +: 8] = in_wb_dat[i*8 +: 8]; // Select byte using indexed part-select
+        in_data_selected[i*8 +: 8] = 8'hFF; // Select byte using indexed part-select
       end
     end
   end
   //
   reg [31:0] store;
-  reg [31:0] store2;
-  reg [31:0] store3;
   always @(*)
   begin
     if (!in_wb_cyc)
       out_wb_dat = 0;
     else
-      out_wb_dat = ~READ_ONLY_BITS & store;
+      out_wb_dat = store;
 
     case (state)
       s_IDLE:
@@ -78,7 +76,6 @@ module wishbone_register #(
       out_wb_ack <= 0;
       out_contents <= INITIAL_VALUE;
       state <= s_IDLE;
-      store3 <= READ_ONLY_BITS;
     end
     else
     begin
@@ -87,18 +84,14 @@ module wishbone_register #(
         s_ACK:
         begin
           out_wb_ack <= 1;
-          //store3 <= READ_ONLY_BITS;
-          out_contents <= (~READ_ONLY_BITS & in_data_selected) | (READ_ONLY_BITS & INITIAL_VALUE);
-          //out_contents <= (~READ_ONLY_BITS & in_data_selected) | (store3 & INITIAL_VALUE);
-
+          out_contents <= (~READ_ONLY_BITS & ((in_data_selected & in_wb_dat ) | (~in_data_selected & out_contents)))
+           | (READ_ONLY_BITS & INITIAL_VALUE);
         end
         s_ACK_OFF:
           out_wb_ack <= 0;
         s_READ1:
         begin
           out_wb_ack <= 1;
-          //out_wb_dat <= (in_live_value & LIVE_BITS) & out_contents;
-          store2 <= in_live_value & LIVE_BITS;
           store <= (in_live_value & LIVE_BITS) | (~LIVE_BITS & out_contents);
         end
         s_READ2:
