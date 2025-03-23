@@ -50,8 +50,8 @@ input wire [DATA_WIDTH-1:0] in_sink_data
                 else next_state = s_IDLE;
       s_ERROR:  next_state = s_ERROR2;
       s_ERROR2: next_state = s_IDLE;
-      s_SINK:   if (in_sink_valid) next_state <= s_READ;
-                else next_state <= s_SINK;
+      s_SINK:   if (in_sink_valid) next_state = s_READ;
+                else next_state = s_SINK;
       s_READ:   begin 
                   next_state = s_READ2;
                   out_wb_dat = save_last_in_sink_data;
